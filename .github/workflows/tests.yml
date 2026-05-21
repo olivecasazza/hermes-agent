@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main, ethie/faster-tests-fake-main]
+    branches: [main, ethie/faster-tests-fake-main, ethie/faster-tests]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -26,8 +26,8 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
-      # Main: single unsliced job (generates duration cache for PRs).
-      # PRs: 4 sliced jobs for parallel wall-time reduction.
+      # Main / fake-main: single unsliced job (generates duration cache for PRs).
+      # Everything else (PRs, feature branches): 4 sliced jobs for parallel wall-time reduction.
       matrix:
         slice: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ethie/faster-tests-fake-main') && fromJSON('[0]') || fromJSON('[1, 2, 3, 4]') }}
     steps:
