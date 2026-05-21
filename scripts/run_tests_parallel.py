@@ -768,11 +768,9 @@ def main() -> int:
     pct = (tests_done / total_tests * 100) if total_tests else 0
     print(f"=== Summary: {len(files)} files, {tests_passed} tests passed, {tests_failed} failed ({pct:.0f}% complete) in {elapsed:.1f}s ({args.jobs} workers) ===")
 
-    # Save durations for future --slice runs. Only write when running
-    # the full suite (no --slice), so each file's time is recorded exactly
-    # once. Sliced runs would produce partial data that could overwrite
-    # good entries with stale values.
-    if slice_index is None and file_times:
+    # Save durations for future --slice runs. Each slice writes its own
+    # partial .test_durations.json; a CI merge step joins them later.
+    if file_times:
         _save_durations(file_times, repo_root)
         print(f"  Durations cached to {_DURATIONS_FILE} ({len(file_times)} files)")
 

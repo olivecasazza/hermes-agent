@@ -26,10 +26,8 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
-      # Main / fake-main: single unsliced job (generates duration cache for PRs).
-      # Everything else (PRs, feature branches): 4 sliced jobs for parallel wall-time reduction.
       matrix:
-        slice: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ethie/faster-tests-fake-main') && fromJSON('[0]') || fromJSON('[1, 2, 3, 4]') }}
+        slice: [1, 2, 3, 4]
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -70,7 +68,7 @@ jobs:
           source .venv/bin/activate
           uv pip install -e ".[all,dev]"
 
-      - name: Run tests
+      - name: Run tests (slice ${{ matrix.slice }}/4)
         # Per-file isolation via scripts/run_tests_parallel.py: discovers
         # every test_*.py file under tests/ (excluding integration/ + e2e/),
         # then runs `python -m pytest <file>` in a freshly-spawned subprocess
@@ -89,28 +87,55 @@ jobs:
         # fix. ThreadPoolExecutor + subprocess.run is ~60 lines and does
         # the job with cleaner semantics.
         #
-        # Matrix slicing (--slice I/N): on PRs, files are distributed
-        # across 4 jobs by cached duration (LPT algorithm) so each job
-        # gets roughly equal wall time. Without a cache (e.g. first PR
-        # after this feature lands), files default to 2s estimate and
-        # get split roughly evenly by count — still correct, just not
-        # perfectly balanced. On main, a single unsliced job runs the
-        # full suite and saves the duration cache for future PRs.
+        # Matrix slicing (--slice I/N): files are distributed across 4
+        # jobs by cached duration (LPT algorithm) so each job gets
+        # roughly equal wall time. Without a cache, files default to 2s
+        # estimate and get split roughly evenly by count — still correct,
+        # just not perfectly balanced.
         run: |
           source .venv/bin/activate
-          if [ "${{ matrix.slice }}" = "0" ]; then
-            python scripts/run_tests_parallel.py
-          else
-            python scripts/run_tests_parallel.py --slice ${{ matrix.slice }}/4
-          fi
+          python scripts/run_tests_parallel.py --slice ${{ matrix.slice }}/4
         env:
           # Ensure tests don't accidentally call real APIs
           OPENROUTER_API_KEY: ""
           OPENAI_API_KEY: ""
           NOUS_API_KEY: ""
 
-      - name: Save duration cache
-        if: matrix.slice == 0
+      - name: Upload per-slice durations
+        uses: actions/upload-artifact@6dd89d2d7e1c5a5c3751b84fdd9be0b5c4bd856d  # v4.6.0
+        with:
+          name: test-durations-slice-${{ matrix.slice }}
+          path: .test_durations.json
+          retention-days: 1
+
+  # Merge per-slice duration data into a single cache, so future runs
+  # (including PRs) get balanced slicing.
+  save-durations:
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ethie/faster-tests-fake-main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all slice durations
+        uses: actions/download-artifact@ccf4b845377f6f7b468af5686b5c7e9e5c8b5f83  # v5.0.0
+        with:
+          pattern: test-durations-slice-*
+          path: durations
+          merge-multiple: true
+
+      - name: Merge into single durations file
+        run: |
+          python3 -c "
+          import json, glob, os
+          merged = {}
+          for f in glob.glob('durations/*test_durations.json') + glob.glob('durations/.test_durations.json'):
+            with open(f) as fh:
+              merged.update(json.load(fh))
+          with open('.test_durations.json', 'w') as fh:
+            json.dump(merged, fh, indent=2, sort_keys=True)
+          print(f'Merged {len(merged)} file durations')
+          "
+
+      - name: Save merged duration cache
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           path: .test_durations.json
