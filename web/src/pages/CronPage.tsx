@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { PluginSlot } from "@/plugins";
+import { PageLoadingBar } from "@/components/PageLoadingBar";
 
 function formatTime(iso?: string | null): string {
   if (!iso) return "—";
@@ -241,11 +242,7 @@ export default function CronPage() {
   }, [setEnd, t.common.create, loading]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Spinner className="text-2xl text-primary" />
-      </div>
-    );
+    return <PageLoadingBar label={t.common.loading} />;
   }
 
   const pendingJob = jobDelete.pendingId

@@ -234,3 +234,33 @@ code { font-size: 0.875rem; }
   display: none;
 }
 
+@keyframes loading-bar-rainbow-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.loading-bar-rainbow {
+  background-image: linear-gradient(
+    90deg,
+    #ff5f6d 0%,
+    #ffc371 16%,
+    #ffe066 32%,
+    #7cf29a 48%,
+    #5ce1e6 64%,
+    #6ea8ff 80%,
+    #c77dff 100%
+  );
+  background-size: 200% 100%;
+  animation: loading-bar-rainbow-shift 2.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar-rainbow {
+    animation: none;
+    background-position: 50% 50%;
+  }
+}

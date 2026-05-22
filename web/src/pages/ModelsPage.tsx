@@ -31,6 +31,7 @@ import { useModalBehavior } from "@/hooks/useModalBehavior";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { useI18n } from "@/i18n";
 import { PluginSlot } from "@/plugins";
+import { PageLoadingBar } from "@/components/PageLoadingBar";
 import { ModelPickerDialog } from "@/components/ModelPickerDialog";
 
 const PERIODS = [
@@ -941,11 +942,7 @@ export default function ModelsPage() {
         )}
       </div>
 
-      {loading && !data && (
-        <div className="flex items-center justify-center py-24">
-          <Spinner className="text-2xl text-primary" />
-        </div>
-      )}
+      {loading && !data && <PageLoadingBar label={t.common.loading} />}
 
       {error && (
         <Card>

@@ -23,7 +23,6 @@ import { useToast } from "@/hooks/useToast";
 import { OAuthProvidersCard } from "@/components/OAuthProvidersCard";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { ListItem } from "@nous-research/ui/ui/components/list-item";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import {
   Card,
   CardContent,
@@ -37,6 +36,7 @@ import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { PluginSlot } from "@/plugins";
+import { PageLoadingBar } from "@/components/PageLoadingBar";
 
 /* ------------------------------------------------------------------ */
 /*  Provider grouping                                                  */
@@ -708,11 +708,7 @@ export default function EnvPage() {
   }, [vars, showAdvanced, t]);
 
   if (!vars) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Spinner className="text-2xl text-primary" />
-      </div>
-    );
+    return <PageLoadingBar label={t.common.loading} />;
   }
 
   const totalProviders = providerGroups.length;

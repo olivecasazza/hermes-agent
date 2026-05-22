@@ -651,9 +651,9 @@
         environment.variables.HERMES_HOME = "${cfg.stateDir}/.hermes";
       })
 
-      # ── Host user group membership ─────────────────────────────────────
+      # ── Host user group membership ───────────────────────────────────────
       (lib.mkIf (cfg.container.enable && cfg.container.hostUsers != []) {
-        users.users = lib.genAttrs cfg.container.hostUsers (user: {
+        users.users = lib.genAttrs cfg.container.hostUsers (_user: {
           extraGroups = [ cfg.group ];
         });
       })

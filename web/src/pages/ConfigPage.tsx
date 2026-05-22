@@ -52,6 +52,7 @@ import { Badge } from "@nous-research/ui/ui/components/badge";
 import { useI18n } from "@/i18n";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { PluginSlot } from "@/plugins";
+import { PageLoadingBar } from "@/components/PageLoadingBar";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -350,11 +351,7 @@ export default function ConfigPage() {
 
   /* ---- Loading ---- */
   if (!config || !schema) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Spinner className="text-2xl text-primary" />
-      </div>
-    );
+    return <PageLoadingBar label={t.common.loading} />;
   }
 
   /* ---- Render field list (shared between search & normal) ---- */

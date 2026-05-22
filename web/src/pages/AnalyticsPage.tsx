@@ -25,6 +25,7 @@ import { Badge } from "@nous-research/ui/ui/components/badge";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { useI18n } from "@/i18n";
 import { PluginSlot } from "@/plugins";
+import { PageLoadingBar } from "@/components/PageLoadingBar";
 
 const PERIODS = [
   { label: "7d", days: 7 },
@@ -517,11 +518,7 @@ export default function AnalyticsPage() {
         </Card>
       )}
 
-      {showTokens && loading && !data && (
-        <div className="flex items-center justify-center py-24">
-          <Spinner className="text-2xl text-primary" />
-        </div>
-      )}
+      {showTokens && loading && !data && <PageLoadingBar label={t.common.loading} />}
 
       {showTokens && error && (
         <Card>

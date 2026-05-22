@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ChevronDown,
   Pencil,
@@ -14,7 +8,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import spinners from "unicode-animations";
 import { H2 } from "@/components/NouiTypography";
 import { api } from "@/lib/api";
 import type { ProfileInfo } from "@/lib/api";
@@ -31,39 +24,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
 import { useI18n } from "@/i18n";
 import { usePageHeader } from "@/contexts/usePageHeader";
+import { PageLoadingBar } from "@/components/PageLoadingBar";
 
 // Mirrors hermes_cli/profiles.py::_PROFILE_ID_RE so we can reject obviously
 // invalid names (uppercase, spaces, …) before round-tripping a doomed POST.
 const PROFILE_NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
-
-/** Braille unicode spinner (`unicode-animations`); static first frame when reduced motion is preferred. */
-function ProfilesLoadingSpinner() {
-  const { frames, interval } = spinners.braille;
-  const [frameIndex, setFrameIndex] = useState(0);
-
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-    const id = window.setInterval(
-      () => setFrameIndex((i) => (i + 1) % frames.length),
-      interval,
-    );
-    return () => window.clearInterval(id);
-  }, [frames.length, interval]);
-
-  return (
-    <span
-      aria-hidden
-      className="inline-block select-none font-mono text-xl leading-none text-muted-foreground"
-    >
-      {frames[frameIndex]}
-    </span>
-  );
-}
 
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<ProfileInfo[]>([]);
@@ -242,17 +207,7 @@ export default function ProfilesPage() {
   }, [setEnd, t.common.create, loading]);
 
   if (loading) {
-    return (
-      <div
-        aria-busy="true"
-        aria-live="polite"
-        className="flex items-center justify-center py-24"
-      >
-        <span className="sr-only">{t.common.loading}</span>
-
-        <ProfilesLoadingSpinner />
-      </div>
-    );
+    return <PageLoadingBar label={t.common.loading} />;
   }
 
   return (

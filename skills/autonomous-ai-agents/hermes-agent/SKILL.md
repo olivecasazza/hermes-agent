@@ -688,7 +688,7 @@ sessions still have zero `kanban_*` schema footprint unless configured.
 - **CLI verbs (common):** `init`, `create`, `list` (alias `ls`),
   `show`, `assign`, `link`, `unlink`, `comment`, `complete`, `block`,
   `unblock`, `archive`, `tail`. Less common: `watch`, `stats`, `runs`,
-  `log`, `dispatch`, `daemon`, `gc`.
+  `log`, `dispatch`, `daemon`.
 - **Worker/orchestrator toolset:** `kanban_show`, `kanban_complete`,
   `kanban_block`, `kanban_heartbeat`, `kanban_comment`, `kanban_create`,
   `kanban_link`; profiles that explicitly enable the `kanban` toolset
