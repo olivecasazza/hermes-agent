@@ -4,7 +4,7 @@
 # transitive deps like onnxruntime that lack compatible wheels on
 # aarch64-darwin. The package and devShell still work on macOS.
 { inputs, ... }: {
-  perSystem = { pkgs, lib, self', ... }:
+  perSystem = { system, pkgs, lib, self', ... }:
     let
       hermes-agent = self'.packages.default;
       hermesVenv = hermes-agent.hermesVenv;
@@ -34,7 +34,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
       '';
     in {
       packages.configKeys = configKeys;
-
+    } // lib.optionalAttrs (system == "x86_64-linux") {
       checks = {
         # Cross-platform evaluation — catches "not supported for interpreter"
         # errors (e.g. sphinx dropping python311) without needing a darwin builder.
